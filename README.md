@@ -1,34 +1,46 @@
-# Home Assistant – Sensor Doubler
+# Spectrumizer — live FFT voor Home Assistant
 
-Een kleine custom integration voor Home Assistant. Ze leest de toestand van een bestaande numerieke sensor, vermenigvuldigt die standaard met **2** en publiceert het resultaat als een afzonderlijke sensor. De bron-sensor wordt niet aangepast.
+Spectrumizer bemonstert een numerieke Home Assistant-sensor aan een ingestelde frequentie, past een Hann-venster toe en berekent een Fast Fourier Transform (FFT). De sensorwaarde is de dominante niet-nulfrequentie in Hz. De volledige frequentiebins en amplitudes worden als attributen aangeboden voor de live Lovelace-grafiek.
 
-## Functies
+## Integratie
 
-- Configuratie via **Instellingen → Apparaten & diensten → Integratie toevoegen → Sensor Doubler**.
-- Kies een bestaande sensor als bron.
-- Geef de nieuwe sensor een naam.
-- Standaardfactor `2`, desgewenst aanpasbaar.
-- Reageert op wijzigingen van de bron-sensor.
-- Behoudt de eenheid van de bron-sensor indien opgegeven.
-- Geeft geen numerieke waarde terug als de bron niet beschikbaar is of geen numerieke toestand heeft.
-- Geen externe service, API-sleutel, Cloudflare Worker of extra Python-dependency nodig.
+- Selecteer een bestaande numerieke sensor.
+- Instelbare samplefrequentie: 0,1–100 samples/s.
+- FFT-venster: 32, 64, 128, 256, 512 of 1024 samples.
+- Sensorwaarde: dominante frequentie in Hz.
+- Attributen: `frequencies`, `magnitudes`, `peak_magnitude`, `sampling_rate_hz`, `frequency_resolution_hz`, `samples_collected` en `ready`.
+- De oorspronkelijke sensor blijft ongewijzigd.
 
-## Installatie
+**Belangrijk:** FFT-resultaten zijn alleen betrouwbaar als de bronsensor voldoende snel verandert en regelmatig kan worden bemonsterd. De maximale meetbare frequentie is de Nyquist-frequentie: de helft van de samplefrequentie. Als de bron maar één keer per seconde verandert, kan een ingestelde samplefrequentie van 10 Hz geen nieuwe informatie creëren.
 
-1. Plaats de map `custom_components/sensor_doubler` in de map `config/custom_components/` van Home Assistant.
+## Installatie van de integratie
+
+1. Kopieer `custom_components/spectrumizer` naar `config/custom_components/spectrumizer`.
 2. Herstart Home Assistant.
 3. Ga naar **Instellingen → Apparaten & diensten → Integratie toevoegen**.
-4. Zoek naar **Sensor Doubler**, selecteer de bron-sensor, geef een naam en laat de factor op `2` staan.
+4. Kies **Spectrumizer** en selecteer de bron-sensor.
+5. Stel samplefrequentie en venstergrootte in.
 
-Voor HACS: voeg deze GitHub-repository toe als een **Integration**-repository en installeer vervolgens de integratie. Herstart Home Assistant daarna.
+De frequentieresolutie is `samplefrequentie / venstergrootte`. Bij 10 Hz en 256 samples is dat ongeveer 0,0391 Hz.
 
-## Voorbeeld
+## Live spectrumkaart installeren
 
-Bron: `sensor.solar_power` met waarde `125.5 W`  
-Nieuwe sensor: `sensor.doubled_sensor` met waarde `251.0 W`
+1. Kopieer `www/spectrumizer-card.js` naar `config/www/spectrumizer-card.js`.
+2. Ga naar **Instellingen → Dashboards → Resources** en voeg toe:
+   - URL: `/local/spectrumizer-card.js`
+   - Type: **JavaScript-module**
+3. Voeg deze kaart toe aan een dashboard. Vervang de entity door de entity-id van je Spectrumizer-sensor:
 
-De naam en entity-id die Home Assistant uiteindelijk toekent kunnen verschillen op basis van je ingestelde naam en bestaande entiteiten.
+```yaml
+type: custom:spectrumizer-card
+entity: sensor.spectrum
+name: Live FFT-spectrum
+# Optioneel: toon alleen frequenties tot 5 Hz
+# max_frequency: 5
+```
 
-## Ontwikkeling
+De kaart toont de dominante frequentie, het aantal verzamelde samples en het spectrum dat live wordt bijgewerkt.
 
-De integratie is opgezet als standalone custom component. Cloudflare is niet nodig voor de sensorberekening. Zie `custom_components/sensor_doubler/` voor de volledige implementatie.
+## HACS
+
+Voeg deze repository in HACS toe als aangepaste **Integration**-repository. Installeer Spectrumizer en herstart Home Assistant. De JavaScript-kaart is een aparte Lovelace-resource en moet apart worden geregistreerd zoals hierboven beschreven.
