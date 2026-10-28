@@ -1,5 +1,1 @@
-{
-  "name": "Sensor Doubler",
-  "render_readme": true,
-  "homeassistant": "2024.6.0"
-}
+{"name":"Spectrumizer","render_readme":true,"homeassistant":"2024.6.0"}
