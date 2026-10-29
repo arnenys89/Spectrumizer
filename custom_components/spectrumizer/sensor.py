@@ -52,6 +52,7 @@ class SpectrumSensor(SensorEntity):
         self._native_value = None
         self._frequencies: list[float] = []
         self._magnitudes: list[float] = []
+        self._history: deque[dict] = deque(maxlen=80)
         # Keep recent FFT frames for the waterfall/spectrogram view.
         self._history: deque[dict] = deque(maxlen=80)
         self._peak_magnitude = None
@@ -66,6 +67,7 @@ class SpectrumSensor(SensorEntity):
             "ready": False,
             "frequencies": [],
             "magnitudes": [],
+            "history": [],
             "history": [],
         }
 
@@ -171,5 +173,6 @@ class SpectrumSensor(SensorEntity):
             "peak_magnitude": self._peak_magnitude,
             "frequencies": self._frequencies if ready else [],
             "magnitudes": self._magnitudes if ready else [],
+            "history": list(self._history),
             "history": list(self._history),
         }
