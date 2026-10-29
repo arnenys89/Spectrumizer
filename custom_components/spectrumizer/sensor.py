@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import deque
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 import math
 
@@ -52,6 +52,8 @@ class SpectrumSensor(SensorEntity):
         self._native_value = None
         self._frequencies: list[float] = []
         self._magnitudes: list[float] = []
+        # Keep recent FFT frames for the waterfall/spectrogram view.
+        self._history: deque[dict] = deque(maxlen=80)
         self._peak_magnitude = None
         self._sample_timer = None
         self._last_source_value = None
@@ -64,6 +66,7 @@ class SpectrumSensor(SensorEntity):
             "ready": False,
             "frequencies": [],
             "magnitudes": [],
+            "history": [],
         }
 
     @property
@@ -133,6 +136,10 @@ class SpectrumSensor(SensorEntity):
         self._peak_magnitude = round(magnitudes[peak_index], 6)
         self._frequencies = [round(float(f), 6) for f in frequencies]
         self._magnitudes = [round(float(m), 6) for m in magnitudes]
+        self._history.append({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "magnitudes": self._magnitudes,
+        })
         self._set_attributes(ready=True)
         self.async_write_ha_state()
 
@@ -164,4 +171,5 @@ class SpectrumSensor(SensorEntity):
             "peak_magnitude": self._peak_magnitude,
             "frequencies": self._frequencies if ready else [],
             "magnitudes": self._magnitudes if ready else [],
+            "history": list(self._history),
         }
