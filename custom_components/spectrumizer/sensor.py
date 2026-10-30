@@ -52,8 +52,7 @@ class SpectrumSensor(SensorEntity):
         self._native_value = None
         self._frequencies: list[float] = []
         self._magnitudes: list[float] = []
-        self._history: deque[dict] = deque(maxlen=80)
-        # Keep recent FFT frames for the waterfall/spectrogram view.
+        # Store compact history frames to keep Home Assistant state attributes small.
         self._history: deque[dict] = deque(maxlen=80)
         self._peak_magnitude = None
         self._sample_timer = None
@@ -67,7 +66,6 @@ class SpectrumSensor(SensorEntity):
             "ready": False,
             "frequencies": [],
             "magnitudes": [],
-            "history": [],
             "history": [],
         }
 
@@ -138,13 +136,28 @@ class SpectrumSensor(SensorEntity):
         self._peak_magnitude = round(magnitudes[peak_index], 6)
         self._frequencies = [round(float(f), 6) for f in frequencies]
         self._magnitudes = [round(float(m), 6) for m in magnitudes]
+        # Downsample each frame to 64 bins to keep HA state attributes compact.
+        history_bins = self._downsample_history(self._magnitudes, 64)
         self._history.append({
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "magnitudes": self._magnitudes,
+            "max_frequency_hz": round(self._sampling_rate / 2, 6),
+            "magnitudes": history_bins,
         })
         self._set_attributes(ready=True)
         self.async_write_ha_state()
 
+    @staticmethod
+    def _downsample_history(values: list[float], bins: int = 64) -> list[float]:
+        """Reduce one FFT frame to a compact, evenly spaced history row."""
+        if not values:
+            return []
+        if len(values) <= bins:
+            return [round(float(value), 6) for value in values]
+        last = len(values) - 1
+        return [
+            round(float(values[round(i * last / (bins - 1))]), 6)
+            for i in range(bins)
+        ]
     def _fft(self, samples: list[float]) -> tuple[list[float], list[float]]:
         """Return one-sided frequency bins and normalized magnitudes."""
         signal = np.asarray(samples, dtype=float)
@@ -173,6 +186,5 @@ class SpectrumSensor(SensorEntity):
             "peak_magnitude": self._peak_magnitude,
             "frequencies": self._frequencies if ready else [],
             "magnitudes": self._magnitudes if ready else [],
-            "history": list(self._history),
             "history": list(self._history),
         }
