@@ -1,6 +1,6 @@
 # Spectrumizer — live FFT voor Home Assistant
 
-Spectrumizer bemonstert een numerieke Home Assistant-sensor aan een ingestelde frequentie, past een Hann-venster toe en berekent een Fast Fourier Transform (FFT). De sensorwaarde is de dominante niet-nulfrequentie in Hz. De volledige frequentiebins en amplitudes worden als attributen aangeboden voor de live Lovelace-grafiek.
+Spectrumizer bemonstert een numerieke Home Assistant-sensor aan een ingestelde frequentie, past een Hann-venster toe en berekent een Fast Fourier Transform (FFT). De sensorwaarde is de dominante niet-nulfrequentie in Hz. De volledige frequentiebins en amplitudes worden als attributen aangeboden.
 
 ## Integratie
 
@@ -23,24 +23,13 @@ Spectrumizer bemonstert een numerieke Home Assistant-sensor aan een ingestelde f
 
 De frequentieresolutie is `samplefrequentie / venstergrootte`. Bij 10 Hz en 256 samples is dat ongeveer 0,0391 Hz.
 
-## Live spectrumkaart installeren
+## Lovelace-kaart
 
-1. Kopieer `www/spectrumizer-card.js` naar `config/www/spectrumizer-card.js`.
-2. Ga naar **Instellingen → Dashboards → Resources** en voeg toe:
-   - URL: `/local/spectrumizer-card.js`
-   - Type: **JavaScript-module**
-3. Voeg deze kaart toe aan een dashboard. Vervang de entity door de entity-id van je Spectrumizer-sensor:
+De Lovelace-kaart wordt afzonderlijk onderhouden in een eigen repository. De kaartcode maakt geen deel uit van deze integratierepository.
 
-```yaml
-type: custom:spectrumizer-card
-entity: sensor.spectrum
-name: Live FFT-spectrum
-# Optioneel: toon alleen frequenties tot 5 Hz
-# max_frequency: 5
-```
-
-De kaart toont de dominante frequentie, het aantal verzamelde samples en het spectrum dat live wordt bijgewerkt.
+- Kaartrepository: https://github.com/arnenys89/spectrumizer-card
+- Volg de HACS-installatiehandleiding en configuratie in de README van die repository.
 
 ## HACS
 
-Voeg deze repository in HACS toe als aangepaste **Integration**-repository. Installeer Spectrumizer en herstart Home Assistant. De JavaScript-kaart is een aparte Lovelace-resource en moet apart worden geregistreerd zoals hierboven beschreven.
+Voeg deze repository in HACS toe als aangepaste **Integration**-repository. Installeer Spectrumizer en herstart Home Assistant. Installeer de Lovelace-kaart afzonderlijk via de repository **Spectrumizer Card** als aangepaste **Dashboard**-repository.
