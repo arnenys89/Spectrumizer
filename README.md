@@ -1,6 +1,6 @@
 # Spectrumizer — live FFT voor Home Assistant
 
-**Versie: 2.0.1**
+**Versie: 2.0.2**
 
 Spectrumizer bemonstert een numerieke Home Assistant-sensor aan een ingestelde frequentie, past een Hann-venster toe en berekent een Fast Fourier Transform (FFT). De sensorwaarde is de dominante niet-nulfrequentie in Hz. De volledige frequentiebins en amplitudes worden als attributen aangeboden.
 
