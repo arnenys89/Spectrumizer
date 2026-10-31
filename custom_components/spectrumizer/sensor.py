@@ -53,7 +53,7 @@ class SpectrumSensor(SensorEntity):
         self._frequencies: list[float] = []
         self._magnitudes: list[float] = []
         # Store compact history frames to keep Home Assistant state attributes small.
-        self._history: deque[dict] = deque(maxlen=80)
+        self._history: deque[dict] = deque(maxlen=20)
         self._peak_magnitude = None
         self._sample_timer = None
         self._last_source_value = None
@@ -67,6 +67,8 @@ class SpectrumSensor(SensorEntity):
             "frequencies": [],
             "magnitudes": [],
             "history": [],
+            "history_count": 0,
+            "history_last_timestamp": None,
         }
 
     @property
@@ -136,8 +138,9 @@ class SpectrumSensor(SensorEntity):
         self._peak_magnitude = round(magnitudes[peak_index], 6)
         self._frequencies = [round(float(f), 6) for f in frequencies]
         self._magnitudes = [round(float(m), 6) for m in magnitudes]
-        # Downsample each frame to 64 bins to keep HA state attributes compact.
-        history_bins = self._downsample_history(self._magnitudes, 64)
+        # Downsample each frame to 32 bins and retain 20 frames to keep the
+        # serialized Home Assistant state attributes comfortably small.
+        history_bins = self._downsample_history(self._magnitudes, 32)
         self._history.append({
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "max_frequency_hz": round(self._sampling_rate / 2, 6),
@@ -187,4 +190,6 @@ class SpectrumSensor(SensorEntity):
             "frequencies": self._frequencies if ready else [],
             "magnitudes": self._magnitudes if ready else [],
             "history": list(self._history),
+            "history_count": len(self._history),
+            "history_last_timestamp": self._history[-1]["timestamp"] if self._history else None,
         }
