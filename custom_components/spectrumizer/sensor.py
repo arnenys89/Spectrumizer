@@ -140,7 +140,7 @@ class SpectrumSensor(SensorEntity):
         self._magnitudes = [round(float(m), 6) for m in magnitudes]
         # Downsample each frame to 32 bins and retain 20 frames to keep the
         # serialized Home Assistant state attributes comfortably small.
-        history_bins = self._downsample_history(self._magnitudes, 32)
+        history_bins = self._downsample_history(self._magnitudes, len(self._magnitudes))
         self._history.append({
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "max_frequency_hz": round(self._sampling_rate / 2, 6),
