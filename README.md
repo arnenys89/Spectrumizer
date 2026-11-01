@@ -1,6 +1,6 @@
 # Spectrumizer — live FFT voor Home Assistant
 
-**Versie: 2.0.3**
+**Versie: 2.0.4**
 
 Spectrumizer bemonstert een numerieke Home Assistant-sensor aan een ingestelde frequentie, past een Hann-venster toe en berekent een Fast Fourier Transform (FFT). De sensorwaarde is de dominante niet-nulfrequentie in Hz. De volledige frequentiebins en amplitudes worden als attributen aangeboden.
 
@@ -9,8 +9,9 @@ Spectrumizer bemonstert een numerieke Home Assistant-sensor aan een ingestelde f
 - Selecteer een bestaande numerieke sensor.
 - Instelbare samplefrequentie: 0,1–100 samples/s.
 - FFT-venster: 32, 64, 128, 256, 512 of 1024 samples.
+- Instelbaar aantal frequentiepunten voor de geschiedenis: 16–513 (standaard 129).
 - Sensorwaarde: dominante frequentie in Hz.
-- Attributen: `frequencies`, `magnitudes`, `peak_magnitude`, `sampling_rate_hz`, `frequency_resolution_hz`, `samples_collected` en `ready`.
+- Attributen: `frequencies`, `magnitudes`, `peak_magnitude`, `sampling_rate_hz`, `frequency_resolution_hz`, `samples_collected`, `ready`, `history_count` en `history_frequency_bins`.
 - De oorspronkelijke sensor blijft ongewijzigd.
 
 **Belangrijk:** FFT-resultaten zijn alleen betrouwbaar als de bronsensor voldoende snel verandert en regelmatig kan worden bemonsterd. De maximale meetbare frequentie is de Nyquist-frequentie: de helft van de samplefrequentie. Als de bron maar één keer per seconde verandert, kan een ingestelde samplefrequentie van 10 Hz geen nieuwe informatie creëren.
