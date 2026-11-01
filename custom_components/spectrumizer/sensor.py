@@ -17,9 +17,11 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import (
+    CONF_HISTORY_BINS,
     CONF_SAMPLING_RATE,
     CONF_SOURCE_ENTITY,
     CONF_WINDOW_SIZE,
+    DEFAULT_HISTORY_BINS,
     DEFAULT_NAME,
 )
 
@@ -46,6 +48,7 @@ class SpectrumSensor(SensorEntity):
         self._source = settings[CONF_SOURCE_ENTITY]
         self._sampling_rate = float(settings[CONF_SAMPLING_RATE])
         self._window_size = int(settings[CONF_WINDOW_SIZE])
+        self._history_bins = int(settings.get(CONF_HISTORY_BINS, DEFAULT_HISTORY_BINS))
         self._attr_name = settings.get(CONF_NAME, DEFAULT_NAME)
         self._attr_unique_id = f"{entry.entry_id}_dominant_frequency"
         self._samples: deque[float] = deque(maxlen=self._window_size)
@@ -61,6 +64,7 @@ class SpectrumSensor(SensorEntity):
             "source_entity": self._source,
             "sampling_rate_hz": self._sampling_rate,
             "window_size": self._window_size,
+            "history_frequency_bins": self._history_bins,
             "frequency_resolution_hz": round(self._sampling_rate / self._window_size, 6),
             "samples_collected": 0,
             "ready": False,
@@ -140,7 +144,7 @@ class SpectrumSensor(SensorEntity):
         self._magnitudes = [round(float(m), 6) for m in magnitudes]
         # Downsample each frame to 32 bins and retain 20 frames to keep the
         # serialized Home Assistant state attributes comfortably small.
-        history_bins = self._downsample_history(self._magnitudes, len(self._magnitudes))
+        history_bins = self._downsample_history(self._magnitudes, self._history_bins)
         self._history.append({
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "max_frequency_hz": round(self._sampling_rate / 2, 6),
