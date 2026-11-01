@@ -65,13 +65,10 @@ class SpectrumizerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return SpectrumizerOptionsFlow(config_entry)
+        return SpectrumizerOptionsFlow()
 
 
 class SpectrumizerOptionsFlow(config_entries.OptionsFlow):
-    def __init__(self, config_entry):
-        self.config_entry = config_entry
-
     async def async_step_init(self, user_input=None):
         current = {**self.config_entry.data, **self.config_entry.options}
         if user_input is not None:
