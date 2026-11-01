@@ -187,6 +187,7 @@ class SpectrumSensor(SensorEntity):
             "source_entity": self._source,
             "sampling_rate_hz": self._sampling_rate,
             "window_size": self._window_size,
+            "history_frequency_bins": self._history_bins,
             "frequency_resolution_hz": round(self._sampling_rate / self._window_size, 6),
             "samples_collected": len(self._samples),
             "ready": ready,
